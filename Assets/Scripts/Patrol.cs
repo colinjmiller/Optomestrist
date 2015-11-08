@@ -20,4 +20,12 @@ public class Patrol : MonoBehaviour {
 			agent.destination = waypoints[currentWaypoint].position;
 		}
 	}
+
+	public void InterjectTarget(Vector3 target) {
+		agent.destination = target;
+	}
+
+	public void ReturnToPatrol() {
+		agent.destination = waypoints [currentWaypoint].position;
+	}
 }
