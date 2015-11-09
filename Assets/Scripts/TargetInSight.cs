@@ -13,14 +13,13 @@ public class TargetInSight : MonoBehaviour {
 	private SphereCollider areaOfAwareness;
 	private Vector3 lastSighting;
 	private Patrol patrolScript;
-	private bool spottedSoundPlayed;
 	private AudioSource doctorMusic;
+	private bool pursuingTarget = false;
 
 	void Awake() {
 		areaOfAwareness = GetComponent<SphereCollider> ();
 		patrolScript = GetComponent<Patrol> ();
 		doctorMusic = GetComponent<AudioSource> ();
-		spottedSoundPlayed = false;
 	}
 	
 	void OnTriggerStay(Collider other) {
@@ -45,7 +44,7 @@ public class TargetInSight : MonoBehaviour {
 	}
 
 	void OnTriggerExit(Collider other) {
-		if (other.gameObject == target) {
+		if (other.gameObject == target && pursuingTarget) {
 			EndPursuit();
 		}
 	}
@@ -53,20 +52,24 @@ public class TargetInSight : MonoBehaviour {
 	void BeginPursuit(Collider other) {
 		targetInSight = true;
 		lastSighting = target.transform.position;
-		patrolScript.InterjectTarget(lastSighting);
-		if (!spottedSoundPlayed && spottedSound != null) {
+		if (!pursuingTarget) {
+			patrolScript.InterjectTarget (lastSighting);
 			doctorMusic.clip = pursuit;
-			doctorMusic.Play();
-			spottedSoundPlayed = true;
-			AudioSource.PlayClipAtPoint(spottedSound, other.transform.position);
+			doctorMusic.Play ();
+			if (spottedSound != null) {
+				AudioSource.PlayClipAtPoint (spottedSound, other.transform.position);
+			}
+		} else {
+			patrolScript.UpdateTargetPosition(other.transform.position);
 		}
+		pursuingTarget = true;
 	}
 
 	void EndPursuit() {
 		targetInSight = false;
 		doctorMusic.clip = atmosphere;
 		doctorMusic.Play();
-		spottedSoundPlayed = false;
+		pursuingTarget = false;
 		patrolScript.ReturnToPatrol();
 	}
 }
